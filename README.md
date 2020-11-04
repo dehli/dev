@@ -1,6 +1,5 @@
 # Getting Started
 
-1. `npm install`
-2. `npm run deploy`
-3. Edit inbound rules for created security group:
-  > SSH, Your IP Address
+1. [Add Key Pair](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#KeyPairs:) (note the name)
+2. `npm install`
+3. export KEY_NAME=your_key_name && `npm run deploy`
