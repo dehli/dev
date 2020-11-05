@@ -17,7 +17,7 @@ const securityGroup = new ec2.SecurityGroup(stack, "SecurityGroup", { vpc });
 securityGroup.connections.allowFromAnyIpv4(ec2.Port.tcp(22));
 
 const user = "ec2-user";
-const userHome = `/home/${user}`;
+const runAsUser = (cmd: string) => `runuser -l ${user} -c '${cmd}'`;
 
 const instance = new ec2.Instance(stack, "Instance", {
   keyName: process.env.KEY_NAME,
@@ -36,11 +36,16 @@ instance.userData.addCommands(
   "yum install -y git",
   "yum install -y util-linux-user",
   "yum install -y zsh",
-  `sudo chsh -s $(which zsh) ${user}`,
-  `ssh-keygen -t rsa -b 4096 -f ${userHome}/.ssh/id_rsa -N ''`,
-  `rm -f ${userHome}/.bash_history`,
-  `rm -f ${userHome}/.bash_logout`,
-  `rm -f ${userHome}/.bash_profile`,
-  `rm -f ${userHome}/.bashrc`,
-  `touch ${userHome}/.zshrc`
+  `yum groupinstall -y "Development Tools"`,
+  runAsUser("sudo chsh -s $(which zsh) $(whoami)"),
+  runAsUser(`ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""`),
+  runAsUser("rm -f ~/.bash_history"),
+  runAsUser("rm -f ~/.bash_logout"),
+  runAsUser("rm -f ~/.bash_profile"),
+  runAsUser("rm -f ~/.bashrc"),
+  runAsUser(`sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"`),
+  runAsUser(`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`),
+  runAsUser(`echo "eval \\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" > ~/.zshrc`),
+  runAsUser(`echo "export ZSH=\\$HOME/.oh-my-zsh" >> ~/.zshrc`),
+  runAsUser(`echo "source \\$ZSH/oh-my-zsh.sh" >> ~/.zshrc`)
 );
