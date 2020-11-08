@@ -32,20 +32,13 @@ const instance = new ec2.Instance(stack, "Instance", {
 
 instance.userData.addCommands(
   "yum update -y",
-  "yum install -y gcc",
-  "yum install -y git",
-  "yum install -y util-linux-user",
-  "yum install -y zsh",
+  "yum install -y gcc git util-linux-user zsh",
   `yum groupinstall -y "Development Tools"`,
   runAsUser("sudo chsh -s $(which zsh) $(whoami)"),
   runAsUser(`ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""`),
-  runAsUser("rm -f ~/.bash_history"),
-  runAsUser("rm -f ~/.bash_logout"),
-  runAsUser("rm -f ~/.bash_profile"),
-  runAsUser("rm -f ~/.bashrc"),
+  runAsUser("rm -f ~/.bash*"),
   runAsUser(`sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"`),
-  runAsUser(`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`),
+  runAsUser(`sh -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`),
   runAsUser(`echo "eval \\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" > ~/.zshrc`),
-  runAsUser(`echo "export ZSH=\\$HOME/.oh-my-zsh" >> ~/.zshrc`),
-  runAsUser(`echo "source \\$ZSH/oh-my-zsh.sh" >> ~/.zshrc`)
+  runAsUser(`echo "export ZSH=\\$HOME/.oh-my-zsh && source \\$ZSH/oh-my-zsh.sh" >> ~/.zshrc`),
 );
