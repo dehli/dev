@@ -1,4 +1,5 @@
 import * as core from "monocdk";
+import * as cloudwatch from "monocdk/aws-cloudwatch";
 import * as ec2 from "monocdk/aws-ec2";
 
 const app = new core.App();
@@ -42,3 +43,22 @@ instance.userData.addCommands(
   runAsUser(`echo "eval \\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" > ~/.zshrc`),
   runAsUser(`echo "export ZSH=\\$HOME/.oh-my-zsh && source \\$ZSH/oh-my-zsh.sh" >> ~/.zshrc`),
 );
+
+// Automatically stop the instance if it's been idle for > 60 minutes
+const alarm = new cloudwatch.Alarm(stack, "InactiveAlarm", {
+  metric: new cloudwatch.Metric({
+    dimensions: { "InstanceId": instance.instanceId },
+    metricName: "CPUUtilization",
+    namespace: "AWS/EC2",
+  })
+    .with({ period: core.Duration.minutes(15) })
+    .with({ statistic: "max" }),
+  comparisonOperator: cloudwatch.ComparisonOperator.LESS_THAN_THRESHOLD,
+  evaluationPeriods: 4,
+  threshold: 1,
+  treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+});
+
+(alarm.node.defaultChild as cloudwatch.CfnAlarm).alarmActions = [
+  `arn:aws:automate:${stack.region}:ec2:stop`
+];
