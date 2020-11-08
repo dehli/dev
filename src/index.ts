@@ -1,6 +1,7 @@
 import * as core from "monocdk";
-import * as cloudwatch from "monocdk/aws-cloudwatch";
 import * as ec2 from "monocdk/aws-ec2";
+import { Alarm } from "./alarm";
+import { Api } from "./api";
 
 const app = new core.App();
 const stack = new core.Stack(app, "DehliDev", {
@@ -17,8 +18,8 @@ const vpc = ec2.Vpc.fromLookup(stack, "Vpc", { isDefault: true });
 const securityGroup = new ec2.SecurityGroup(stack, "SecurityGroup", { vpc });
 securityGroup.connections.allowFromAnyIpv4(ec2.Port.tcp(22));
 
-const user = "ec2-user";
-const runAsUser = (cmd: string) => `runuser -l ${user} -c '${cmd}'`;
+const username = "ec2-user";
+const runAsUser = (cmd: string) => `runuser -l ${username} -c '${cmd}'`;
 
 const instance = new ec2.Instance(stack, "Instance", {
   keyName: process.env.KEY_NAME,
@@ -45,20 +46,7 @@ instance.userData.addCommands(
 );
 
 // Automatically stop the instance if it's been idle for > 60 minutes
-const alarm = new cloudwatch.Alarm(stack, "InactiveAlarm", {
-  metric: new cloudwatch.Metric({
-    dimensions: { "InstanceId": instance.instanceId },
-    metricName: "CPUUtilization",
-    namespace: "AWS/EC2",
-  })
-    .with({ period: core.Duration.minutes(15) })
-    .with({ statistic: "max" }),
-  comparisonOperator: cloudwatch.ComparisonOperator.LESS_THAN_THRESHOLD,
-  evaluationPeriods: 4,
-  threshold: 1,
-  treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
-});
+new Alarm(stack, "InactiveAlarm", { instance, region: stack.region, });
 
-(alarm.node.defaultChild as cloudwatch.CfnAlarm).alarmActions = [
-  `arn:aws:automate:${stack.region}:ec2:stop`
-];
+// Expose the instance via an api (since the instance's url will be changing)
+new Api(stack, "Api", { instance, username });
