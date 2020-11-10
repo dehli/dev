@@ -2,9 +2,9 @@ import * as AWS from "aws-sdk";
 const ec2 = new AWS.EC2();
 const { INSTANCE_ID, USERNAME } = process.env;
 
-const error = (error: string) => ({
-  statusCode: 400,
-  body: JSON.stringify({ error })
+const response = (status: string) => ({
+  statusCode: 200,
+  body: JSON.stringify({ status })
 });
 
 export const handler = async () => {
@@ -23,9 +23,9 @@ export const handler = async () => {
     case 80:
       // The instance is currently stopped so we'll need to start it up
       await ec2.startInstances({ InstanceIds }).promise();
-      return error("Instance started");
+      return response("Instance started");
 
     default:
-      return error("Instance unavailable");
+      return response("Instance unavailable");
   }
 };

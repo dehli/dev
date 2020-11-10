@@ -27,12 +27,12 @@ export class Api extends api.HttpApi {
           },
           initialPolicy: [
             new PolicyStatement({
-              actions: [
-                "ec2:*"
-              ],
-              resources: [
-                `arn:aws:ec2:*:*:instance/${instance.instanceId}`
-              ]
+              actions: ["ec2:StartInstances", "ec2:StopInstances"],
+              resources: [`arn:aws:ec2:*:*:instance/${instance.instanceId}`]
+            }),
+            new PolicyStatement({
+              actions: ["ec2:DescribeInstances"],
+              resources: ["*"]
             })
           ]
         })
