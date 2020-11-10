@@ -5,6 +5,10 @@ import { Api } from "./api";
 import { Instance } from "./instance";
 
 export interface StackProps {
+  inactiveCheck?: {
+    evaluationPeriods: number;
+    period: core.Duration;
+  };
   instanceSize?: ec2.InstanceSize;
   keyName?: string;
 }
@@ -22,6 +26,10 @@ export class Stack extends core.Stack {
     });
 
     const propsWithDefaults = {
+      inactiveCheck: {
+        evaluationPeriods: 4,
+        period: core.Duration.minutes(15),
+      },
       instanceSize: ec2.InstanceSize.MICRO,
       ...props,
     };
@@ -29,7 +37,13 @@ export class Stack extends core.Stack {
     const instance = new Instance(this, `${id}Instance`, propsWithDefaults);
 
     // Automatically stop the instance if it's been idle for > 60 minutes
-    new Alarm(this, `${id}Inactive`, { instance, region: this.region, });
+    if (propsWithDefaults.inactiveCheck) {
+      new Alarm(this, `${id}Inactive`, {
+        ...propsWithDefaults.inactiveCheck,
+        instance,
+        region: this.region,
+      });
+    }
 
     // Expose the instance via an api (since the instance's url will be changing)
     new Api(this, `${id}Api`, { instance, username: instance.username });
