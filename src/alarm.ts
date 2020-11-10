@@ -10,10 +10,14 @@ export interface AlarmProps {
 }
 
 export class Alarm extends cloudwatch.Alarm {
-  constructor(scope: core.Construct, id: string, { evaluationPeriods, instance, period, region }: AlarmProps) {
+  constructor(
+    scope: core.Construct,
+    id: string,
+    { evaluationPeriods, instance, period, region }: AlarmProps
+  ) {
     super(scope, id, {
       metric: new cloudwatch.Metric({
-        dimensions: { "InstanceId": instance.instanceId },
+        dimensions: { InstanceId: instance.instanceId },
         metricName: "CPUUtilization",
         namespace: "AWS/EC2",
       })
@@ -26,7 +30,7 @@ export class Alarm extends cloudwatch.Alarm {
     });
 
     (this.node.defaultChild as cloudwatch.CfnAlarm).alarmActions = [
-      `arn:aws:automate:${region}:ec2:stop`
+      `arn:aws:automate:${region}:ec2:stop`,
     ];
   }
 }

@@ -22,7 +22,7 @@ export class Stack extends core.Stack {
       },
       tags: {
         repository: "https://github.com/dehli/dev",
-      }
+      },
     });
 
     const propsWithDefaults = {

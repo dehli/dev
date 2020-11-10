@@ -12,7 +12,11 @@ export interface ApiProps {
 }
 
 export class Api extends api.HttpApi {
-  constructor(scope: core.Construct, id: string, { instance, username }: ApiProps) {
+  constructor(
+    scope: core.Construct,
+    id: string,
+    { instance, username }: ApiProps
+  ) {
     super(scope, id, {
       defaultIntegration: new api.LambdaProxyIntegration({
         handler: new lambda.Function(scope, `${id}Lambda`, {
@@ -28,15 +32,15 @@ export class Api extends api.HttpApi {
           initialPolicy: [
             new PolicyStatement({
               actions: ["ec2:StartInstances", "ec2:StopInstances"],
-              resources: [`arn:aws:ec2:*:*:instance/${instance.instanceId}`]
+              resources: [`arn:aws:ec2:*:*:instance/${instance.instanceId}`],
             }),
             new PolicyStatement({
               actions: ["ec2:DescribeInstances"],
-              resources: ["*"]
-            })
-          ]
-        })
-      })
+              resources: ["*"],
+            }),
+          ],
+        }),
+      }),
     });
   }
 }
