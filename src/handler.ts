@@ -2,11 +2,6 @@ import * as AWS from "aws-sdk";
 const ec2 = new AWS.EC2();
 const { INSTANCE_ID, USERNAME } = process.env;
 
-const response = (status: string) => ({
-  statusCode: 200,
-  body: JSON.stringify({ status }),
-});
-
 export const handler = async () => {
   const InstanceIds = [INSTANCE_ID!];
   const { Reservations } = await ec2
@@ -15,19 +10,17 @@ export const handler = async () => {
 
   const instance = Reservations![0].Instances![0];
   switch (instance.State!.Code) {
+    case 0:
+      return "Instance starting";
     case 16:
-      // The instance is running so we redirect to its url
-      return {
-        statusCode: 302,
-        headers: { Location: `ssh://${USERNAME}@${instance.PublicDnsName}` },
-      };
-
+      return `ssh://${USERNAME}@${instance.PublicDnsName}`;
+    case 64:
+      return "Instance stopping";
     case 80:
-      // The instance is currently stopped so we'll need to start it up
       await ec2.startInstances({ InstanceIds }).promise();
-      return response("Instance started");
-
+      return "Instance started";
     default:
-      return response("Instance unavailable");
+      console.log(instance.State);
+      return "Unhandled error";
   }
 };
