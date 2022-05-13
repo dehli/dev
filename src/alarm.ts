@@ -17,7 +17,7 @@ export class Alarm extends cloudwatch.Alarm {
   ) {
     super(scope, id, {
       metric: new cloudwatch.Metric({
-        dimensions: { InstanceId: instance.instanceId },
+        dimensionsMap: { InstanceId: instance.instanceId },
         metricName: "CPUUtilization",
         namespace: "AWS/EC2",
       })

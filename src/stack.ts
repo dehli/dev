@@ -46,6 +46,12 @@ export class Stack extends core.Stack {
     }
 
     // Expose the instance via an api (since the instance's url will be changing)
-    new Api(this, `${id}Api`, { instance, username: instance.username });
+    const api = new Api(this, `${id}Api`, {
+      instance,
+      username: instance.username,
+    });
+
+    // CloudFormation Outputs
+    new core.CfnOutput(this, "ApiUrl", { value: api.url });
   }
 }
