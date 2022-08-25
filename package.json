@@ -22,9 +22,9 @@
   "homepage": "https://github.com/dehli/dev#readme",
   "dependencies": {
     "@types/node": "^17.0.31",
-    "cdk": "^2.23.0",
+    "cdk": "^2.38.1",
     "constructs": "^3.4.4",
-    "monocdk": "^1.155.0",
+    "monocdk": "^1.169.0",
     "typescript": "^4.6.4"
   },
   "devDependencies": {

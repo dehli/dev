@@ -22,7 +22,7 @@ export class Api extends lambda.Function {
       code: lambda.Code.fromInline(
         fs.readFileSync(path.resolve(__dirname, "handler.js")).toString()
       ),
-      runtime: lambda.Runtime.NODEJS_12_X,
+      runtime: lambda.Runtime.NODEJS_16_X,
       handler: "index.handler",
       environment: {
         INSTANCE_ID: instance.instanceId,
